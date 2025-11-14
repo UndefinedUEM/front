@@ -21,6 +21,11 @@ export type PresenceList = {
   confirmedScouts: ScoutData[];
 };
 
+export type LoginData = {
+  email: string;
+  password: string;
+};
+
 export type LoginResponse = {
   user: User;
   access_token: string;

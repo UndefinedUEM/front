@@ -11,125 +11,105 @@ import {
   InputGroup,
   InputRightElement,
   IconButton,
+  FormErrorMessage,
 } from '@chakra-ui/react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useAsync from '../../hooks/useAsync';
-import scoutApi from '../../services/scoutApi';
 import { getErrorMessage } from '@/utils/getErrorMessage';
+import useAsync from '@/hooks/useAsync';
+import scoutApi from '@/services/scoutApi';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { UserData } from '@/services/scoutApi.types';
+
+const registrationSchema = z
+  .object({
+    name: z.string().min(1, 'O nome é obrigatório.'),
+    email: z
+      .string()
+      .min(1, 'O e-mail é obrigatório.')
+      .email('Digite um e-mail válido.'),
+    confirmEmail: z.string().min(1, 'Confirme seu e-mail.'),
+    password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres.'),
+    confirmPassword: z.string().min(1, 'Confirme sua senha.'),
+  })
+  .refine((data) => data.email === data.confirmEmail, {
+    message: 'Os e-mails não coincidem',
+    path: ['confirmEmail'],
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'As senhas não coincidem',
+    path: ['confirmPassword'],
+  });
+
+type RegistrationFormData = z.infer<typeof registrationSchema>;
+
+const defaultValues: RegistrationFormData = {
+  name: '',
+  email: '',
+  confirmEmail: '',
+  password: '',
+  confirmPassword: '',
+};
 
 const UserRegistrationPage = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [confirmEmail, setConfirmEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
 
-  const isFormFilled =
-    name.length > 0 &&
-    email.length > 0 &&
-    confirmEmail.length > 0 &&
-    password.length > 0 &&
-    confirmPassword.length > 0;
-
-  const areEmailsMatching = email === confirmEmail;
-  const isPasswordValid = password.length >= 6;
-  const arePasswordsMatching = password === confirmPassword;
-
-  const isButtonDisabled =
-    !isFormFilled ||
-    !areEmailsMatching ||
-    !isPasswordValid ||
-    !arePasswordsMatching;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting, isValid, isDirty },
+  } = useForm<RegistrationFormData>({
+    mode: 'all',
+    defaultValues: defaultValues,
+    resolver: zodResolver(registrationSchema),
+  });
 
   const handlePasswordVisibility = () => setShowPassword(!showPassword);
 
   const handleConfirmPasswordVisibility = () =>
     setShowConfirmPassword(!showConfirmPassword);
 
-  const { call: handleRegister, loading: isLoading } = useAsync(async () => {
-    try {
-      await scoutApi.registerUser({ name, email, password });
+  const { call: handleRegister, loading: isLoading } = useAsync(
+    async (data: UserData) => {
+      try {
+        await scoutApi.registerUser(data);
 
-      toast({
-        title: 'Cadastro realizado com sucesso!',
-        description: 'Você será redirecionado para a página de login.',
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-        position: 'top',
-      });
+        toast({
+          title: 'Cadastro realizado com sucesso!',
+          description: 'Você será redirecionado para a página de login.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+          position: 'top',
+        });
 
-      navigate('/login');
-    } catch (error) {
-      toast({
-        title: 'Erro no cadastro.',
-        description: getErrorMessage(error),
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-        position: 'top',
-      });
-    }
-  }, [name, email, password, navigate, toast]);
+        navigate('/login');
+      } catch (error) {
+        toast({
+          title: 'Erro no cadastro.',
+          description: getErrorMessage(error),
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: 'top',
+        });
+      }
+    },
+    [navigate, toast]
+  );
 
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-
-    if (!name || !email || !confirmEmail || !password || !confirmPassword) {
-      toast({
-        title: 'Campos obrigatórios.',
-        description: 'Por favor, preencha todos os campos do formulário.',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-        position: 'top',
-      });
-      return;
-    }
-
-    if (email !== confirmEmail) {
-      toast({
-        title: 'Erro de validação.',
-        description: 'Os endereços de e-mail não coincidem.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-        position: 'top',
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast({
-        title: 'Senha fraca.',
-        description: 'Sua senha deve ter no mínimo 6 caracteres.',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-        position: 'top',
-      });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast({
-        title: 'Erro de validação.',
-        description: 'As senhas não coincidem.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-        position: 'top',
-      });
-      return;
-    }
-
-    handleRegister();
+  const onSubmit = (data: RegistrationFormData) => {
+    handleRegister({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    });
   };
 
   return (
@@ -140,53 +120,57 @@ const UserRegistrationPage = () => {
         borderRadius="lg"
         boxShadow="md"
       >
-        <VStack as="form" onSubmit={handleSubmit} spacing="6" align="stretch">
+        <VStack
+          as="form"
+          onSubmit={handleSubmit(onSubmit)}
+          spacing="6"
+          align="stretch"
+        >
           <Heading as="h1" size="lg" textAlign="center">
             Cadastro de Usuário
           </Heading>
 
-          <FormControl isRequired>
+          <FormControl isRequired isInvalid={!!errors.name}>
             <FormLabel htmlFor="name">Nome</FormLabel>
             <Input
               id="name"
               type="text"
               placeholder="Digite seu nome completo"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...register('name')}
             />
+            <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl isRequired isInvalid={!!errors.email}>
             <FormLabel htmlFor="email">E-mail</FormLabel>
             <Input
               id="email"
               type="email"
               placeholder="seu.email@exemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register('email')}
             />
+            <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl isRequired isInvalid={!!errors.confirmEmail}>
             <FormLabel htmlFor="confirmEmail">Confirmar E-mail</FormLabel>
             <Input
               id="confirmEmail"
               type="email"
               placeholder="Digite seu e-mail novamente"
-              value={confirmEmail}
-              onChange={(e) => setConfirmEmail(e.target.value)}
+              {...register('confirmEmail')}
             />
+            <FormErrorMessage>{errors.confirmEmail?.message}</FormErrorMessage>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl isRequired isInvalid={!!errors.password}>
             <FormLabel htmlFor="password">Senha</FormLabel>
             <InputGroup>
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Crie uma senha (mín. 6 caracteres)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register('password')}
               />
               <InputRightElement>
                 <IconButton
@@ -198,39 +182,42 @@ const UserRegistrationPage = () => {
                 />
               </InputRightElement>
             </InputGroup>
+            <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl isRequired isInvalid={!!errors.confirmPassword}>
             <FormLabel htmlFor="confirmPassword">Confirmar Senha</FormLabel>
             <InputGroup>
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Digite sua senha novamente"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                {...register('confirmPassword')}
               />
               <InputRightElement>
                 <IconButton
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleConfirmPasswordVisibility}
+                  icon={showConfirmPassword ? <EyeOff /> : <Eye />}
                   aria-label={
                     showConfirmPassword ? 'Esconder senha' : 'Mostrar senha'
                   }
-                  icon={showConfirmPassword ? <EyeOff /> : <Eye />}
-                  onClick={handleConfirmPasswordVisibility}
-                  variant="ghost"
-                  size="sm"
                 />
               </InputRightElement>
             </InputGroup>
+            <FormErrorMessage>
+              {errors.confirmPassword?.message}
+            </FormErrorMessage>
           </FormControl>
 
           <Button
-            type="submit"
-            colorScheme="teal"
             size="lg"
             width="full"
-            isLoading={isLoading}
-            disabled={isButtonDisabled || isLoading}
+            type="submit"
+            colorScheme="teal"
+            isLoading={isSubmitting || isLoading}
+            isDisabled={!isDirty || !isValid || isSubmitting || isLoading}
           >
             Confirmar Cadastro
           </Button>

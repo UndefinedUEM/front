@@ -7,6 +7,7 @@ import type {
   User,
   PresenceList,
   LoginResponse,
+  LoginData,
 } from './scoutApi.types';
 
 const api = axios.create({
@@ -22,12 +23,9 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 });
 
 const scoutApi = {
-  login: async (email: string, password: string): Promise<LoginResponse> => {
+  login: async (body: LoginData): Promise<LoginResponse> => {
     try {
-      const { data } = await api.post<LoginResponse>('/auth/login', {
-        email,
-        password,
-      });
+      const { data } = await api.post<LoginResponse>('/auth/login', body);
       if (data.access_token) {
         localStorage.setItem('authToken', data.access_token);
       }

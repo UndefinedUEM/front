@@ -16,16 +16,34 @@ import {
   Link,
   Text,
   Flex,
+  FormErrorMessage,
 } from '@chakra-ui/react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
-import useAsync from '../../hooks/useAsync';
-import scoutApi from '../../services/scoutApi';
 import { getErrorMessage } from '@/utils/getErrorMessage';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { LoginData } from '@/services/scoutApi.types';
+import { useAuth } from '@/contexts/AuthContext';
+import useAsync from '@/hooks/useAsync';
+import scoutApi from '@/services/scoutApi';
+
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'O e-mail é obrigatório.')
+    .email('Digite um e-mail válido.'),
+  password: z.string().min(1, 'Confirme sua senha.'),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+const defaultValues: LoginFormData = {
+  email: '',
+  password: '',
+};
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
@@ -33,38 +51,39 @@ const LoginPage = () => {
 
   const handlePasswordVisibility = () => setShowPassword(!showPassword);
 
-  const { call: handleLogin, loading: isLoading } = useAsync(async () => {
-    try {
-      await scoutApi.login(email, password);
-      const userData = await scoutApi.getUserData();
-      login(userData);
-      navigate('/');
-    } catch (error) {
-      toast({
-        title: 'Erro no login.',
-        description: getErrorMessage(error),
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-        position: 'top',
-      });
-    }
-  }, [email, password, login, navigate, toast]);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting, isValid, isDirty },
+  } = useForm<LoginFormData>({
+    mode: 'all',
+    defaultValues: defaultValues,
+    resolver: zodResolver(loginSchema),
+  });
 
-  const handleSubmit = (event: { preventDefault: () => void }) => {
-    event.preventDefault();
-    if (!email || !password) {
-      toast({
-        title: 'Campos obrigatórios.',
-        description: 'Por favor, preencha seu e-mail e senha.',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-        position: 'top',
-      });
-      return;
-    }
-    handleLogin();
+  const { call: handleLogin, loading: isLoading } = useAsync(
+    async (data: LoginData) => {
+      try {
+        await scoutApi.login(data);
+        const userData = await scoutApi.getUserData();
+        login(userData);
+        navigate('/');
+      } catch (error) {
+        toast({
+          title: 'Erro no login.',
+          description: getErrorMessage(error),
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: 'top',
+        });
+      }
+    },
+    [login, navigate, toast]
+  );
+
+  const onSubmit = (data: LoginData) => {
+    handleLogin({ email: data.email, password: data.password });
   };
 
   return (
@@ -76,29 +95,33 @@ const LoginPage = () => {
         borderRadius="lg"
         boxShadow="md"
       >
-        <VStack as="form" onSubmit={handleSubmit} spacing="6" align="stretch">
+        <VStack
+          as="form"
+          onSubmit={handleSubmit(onSubmit)}
+          spacing="6"
+          align="stretch"
+        >
           <Heading as="h1" size="lg" textAlign="center">
             Entrar
           </Heading>
-          <FormControl isRequired>
+          <FormControl isRequired isInvalid={!!errors.email}>
             <FormLabel htmlFor="email">E-mail</FormLabel>
             <Input
               id="email"
               type="email"
               placeholder="seu.email@exemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register('email')}
             />
+            <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
           </FormControl>
-          <FormControl isRequired>
+          <FormControl isRequired isInvalid={!!errors.password}>
             <FormLabel htmlFor="password">Senha</FormLabel>
             <InputGroup>
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Digite sua senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register('password')}
               />
               <InputRightElement>
                 <IconButton
@@ -110,6 +133,7 @@ const LoginPage = () => {
                 />
               </InputRightElement>
             </InputGroup>
+            <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
           </FormControl>
           {/* <Stack direction="row" justify="flex-end" align="center">
             <Link as={RouterLink} to="/recuperar-senha" color="teal.500" fontSize="sm">
@@ -121,7 +145,8 @@ const LoginPage = () => {
             colorScheme="teal"
             size="lg"
             width="full"
-            isLoading={isLoading}
+            isLoading={isSubmitting || isLoading}
+            isDisabled={!isDirty || !isValid || isSubmitting || isLoading}
           >
             Entrar
           </Button>
