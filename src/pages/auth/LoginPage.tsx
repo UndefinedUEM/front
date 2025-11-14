@@ -21,6 +21,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import useAsync from '../../hooks/useAsync';
 import scoutApi from '../../services/scoutApi';
+import { getErrorMessage } from '@/utils/getErrorMessage';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -41,7 +42,7 @@ const LoginPage = () => {
     } catch (error) {
       toast({
         title: 'Erro no login.',
-        description: error.message,
+        description: getErrorMessage(error),
         status: 'error',
         duration: 5000,
         isClosable: true,

@@ -22,6 +22,7 @@ import type { ScoutData } from '../../services/scoutApi.types';
 import AttendanceCard from '../../components/AttendanceCard';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { AttendanceStatus } from '../../common/types/enums';
+import { getErrorMessage } from '@/utils/getErrorMessage';
 
 type AttendanceList = {
   id: string | number;
@@ -32,7 +33,7 @@ type AttendanceList = {
 
 const AttendanceHistoryPage = () => {
   const [apiLists, setApiLists] = useState<AttendanceList[]>([]);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const navigate = useNavigate();
   const toast = useToast();
@@ -45,9 +46,16 @@ const AttendanceHistoryPage = () => {
   const { call: fetchLists, loading: isLoading } = useAsync(async () => {
     try {
       const response = await scoutApi.getLists();
-      setApiLists(response || []);
+      if (Array.isArray(response)) {
+        setApiLists(response);
+      } else if (response) {
+        setApiLists([response]);
+      } else {
+        setApiLists([]);
+      }
     } catch (err) {
-      setError(err.message);
+      const message = getErrorMessage(err);
+      setError(message);
     }
   }, []);
 
@@ -73,7 +81,7 @@ const AttendanceHistoryPage = () => {
       } catch (err) {
         toast({
           title: 'Erro ao confirmar lista',
-          description: err.message,
+          description: getErrorMessage(err),
           status: 'error',
           position: 'top',
         });

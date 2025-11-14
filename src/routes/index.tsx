@@ -1,7 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/auth/LoginPage';
 import UserRegistrationPage from '@/pages/auth/UserRegistrationPage';
 import ScoutRegistrationPage from '@/pages/scouts/ScoutRegistrationPage';
@@ -11,7 +10,8 @@ import AttendanceSummaryPage from '@/pages/attendance/AttendanceSummaryPage';
 import AttendanceSuccessPage from '@/pages/attendance/AttendanceSuccessPage';
 import AttendanceHistoryPage from '@/pages/attendance/AttendanceHistoryPage';
 import AttendanceDetailPage from '@/pages/attendance/AttendanceDetailPage';
-import NotFoundPage from '@/pages/NotFoundPage';
+import NotFoundPage from '@/NotFoundPage';
+import HomePage from '@/HomePage';
 
 const AppRoutes = () => {
   return (

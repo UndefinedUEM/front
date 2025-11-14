@@ -13,10 +13,11 @@ import {
   IconButton,
 } from '@chakra-ui/react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAsync from '../../hooks/useAsync';
 import scoutApi from '../../services/scoutApi';
+import { getErrorMessage } from '@/utils/getErrorMessage';
 
 const UserRegistrationPage = () => {
   const [name, setName] = useState('');
@@ -28,6 +29,23 @@ const UserRegistrationPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
+
+  const isFormFilled =
+    name.length > 0 &&
+    email.length > 0 &&
+    confirmEmail.length > 0 &&
+    password.length > 0 &&
+    confirmPassword.length > 0;
+
+  const areEmailsMatching = email === confirmEmail;
+  const isPasswordValid = password.length >= 6;
+  const arePasswordsMatching = password === confirmPassword;
+
+  const isButtonDisabled =
+    !isFormFilled ||
+    !areEmailsMatching ||
+    !isPasswordValid ||
+    !arePasswordsMatching;
 
   const handlePasswordVisibility = () => setShowPassword(!showPassword);
 
@@ -51,7 +69,7 @@ const UserRegistrationPage = () => {
     } catch (error) {
       toast({
         title: 'Erro no cadastro.',
-        description: error.message,
+        description: getErrorMessage(error),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -60,7 +78,7 @@ const UserRegistrationPage = () => {
     }
   }, [name, email, password, navigate, toast]);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
 
     if (!name || !email || !confirmEmail || !password || !confirmPassword) {
@@ -187,7 +205,7 @@ const UserRegistrationPage = () => {
             <InputGroup>
               <Input
                 id="confirmPassword"
-                type={showPassword ? 'text' : 'password'}
+                type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Digite sua senha novamente"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -212,6 +230,7 @@ const UserRegistrationPage = () => {
             size="lg"
             width="full"
             isLoading={isLoading}
+            disabled={isButtonDisabled || isLoading}
           >
             Confirmar Cadastro
           </Button>
