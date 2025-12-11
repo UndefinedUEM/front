@@ -1,62 +1,42 @@
-import { Routes, Route } from 'react-router-dom';
-import Layout from '@/components/Layout';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import LoginPage from '@/pages/auth/LoginPage';
-import UserRegistrationPage from '@/pages/auth/UserRegistrationPage';
-import ScoutRegistrationPage from '@/pages/scouts/ScoutRegistrationPage';
-import ScoutRegistrationSuccessPage from '@/pages/scouts/ScoutRegistrationSuccessPage';
-import AttendanceListPage from '@/pages/attendance/AttendanceListPage';
-import AttendanceSummaryPage from '@/pages/attendance/AttendanceSummaryPage';
-import AttendanceSuccessPage from '@/pages/attendance/AttendanceSuccessPage';
-import AttendanceHistoryPage from '@/pages/attendance/AttendanceHistoryPage';
-import AttendanceDetailPage from '@/pages/attendance/AttendanceDetailPage';
-import NotFoundPage from '@/NotFoundPage';
-import HomePage from '@/HomePage';
+import { Routes, Route, Outlet } from 'react-router-dom';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import LoginPage from '@/pages/LoginPage';
+import RegisterPage from '@/pages/RegisterPage';
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
+import DashboardPage from '@/pages/DashboardPage';
+import AttendancePage from '@/pages/AttendancePage';
+import ScoutsPage from '@/pages/ScoutsPage';
+import EventsPage from '@/pages/EventsPage';
+import UsersPage from '@/pages/UsersPage';
+import ProfilePage from '@/pages/ProfilePage';
+import NotFoundPage from '@/pages/NotFoundPage';
+import MembersPage from '@/pages/MembersPage';
+
+const ProtectedLayout = () => {
+  return (
+    <ProtectedRoute>
+      <Outlet />
+    </ProtectedRoute>
+  );
+};
 
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* <Route path="/authorize" element={<PreAuthPage />} />
-      
-      <Route element={<PreAuthRoute />}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/recuperar-senha" element={<PasswordRecoveryPage />} />
-        <Route path="/cadastro/usuario" element={<UserRegistrationPage />} />
-      </Route> */}
+      {/* Public Routes */}
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/cadastro/usuario" element={<UserRegistrationPage />} />
-
-      <Route
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="/" element={<HomePage />} />
-        <Route
-          path="/cadastro/escoteiros"
-          element={<ScoutRegistrationPage />}
-        />
-        <Route
-          path="/cadastro/escoteiros/sucesso"
-          element={<ScoutRegistrationSuccessPage />}
-        />
-        <Route path="/listas/presenca" element={<AttendanceListPage />} />
-        <Route
-          path="/listas/presenca/resumo"
-          element={<AttendanceSummaryPage />}
-        />
-        <Route
-          path="/listas/presenca/sucesso"
-          element={<AttendanceSuccessPage />}
-        />
-        <Route path="/listas/historico" element={<AttendanceHistoryPage />} />
-        <Route
-          path="/listas/detalhes/:listId"
-          element={<AttendanceDetailPage />}
-        />
+      {/* Protected Routes */}
+      <Route element={<ProtectedLayout />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/attendance" element={<AttendancePage />} />
+        <Route path="/scouts" element={<ScoutsPage />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/members" element={<MembersPage />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />

@@ -1,80 +1,68 @@
-import {
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-  type ReactNode,
-} from 'react';
-import scoutApi from '../services/scoutApi';
-import type { User } from '../services/scoutApi.types';
+import { createContext, useContext, useState, type ReactNode } from 'react';
+import { type Member } from '@/types';
+import { mockAuthUsers } from '@/mock-list';
 
-type AuthProviderProps = {
-  children: ReactNode;
+export type AuthUser = Omit<Member, 'password'> & {
+  userId?: string;
+  token?: string;
 };
 
-type AuthContextType = {
-  isAuthenticated: boolean;
-  user: User | null;
-  login: (userData: User) => void;
+interface AuthContextType {
+  user: AuthUser | null;
+  login: (userId: string, pass: string) => Promise<boolean>;
   logout: () => void;
-};
+  isAuthenticated: boolean;
+}
 
-const AuthContext = createContext<AuthContextType>({
-  isAuthenticated: false,
-  user: null,
-  login: () => {},
-  logout: () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    const stored = localStorage.getItem('authUser');
+    return stored ? JSON.parse(stored) : null;
+  });
 
-  useEffect(() => {
-    const loadUserFromToken = async () => {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        try {
-          const userData = await scoutApi.getUserData();
-          setUser(userData);
-          setIsAuthenticated(true);
-        } catch (error) {
-          console.error(
-            'Falha ao buscar dados do usuário, limpando token:',
-            error
-          );
-          localStorage.removeItem('authToken');
-        }
-      }
-      setIsLoading(false);
-    };
+  const login = async (userId: string, pass: string): Promise<boolean> => {
+    const found: Member | undefined = mockAuthUsers.find(
+      (u) => (u.id === userId || u.email === userId) && u.password === pass
+    );
 
-    loadUserFromToken();
-  }, []);
+    if (found) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...userData } = found;
 
-  const login = (userData: User) => {
-    setUser(userData);
-    setIsAuthenticated(true);
+      const authUser: AuthUser = {
+        ...userData,
+        userId: found.id,
+      };
+
+      setUser(authUser);
+      localStorage.setItem('authUser', JSON.stringify(authUser));
+      return true;
+    }
+    return false;
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
     setUser(null);
-    setIsAuthenticated(false);
+    localStorage.removeItem('authUser');
   };
 
-  if (isLoading) {
-    return null;
-  }
-
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, isAuthenticated: !!user }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  return useContext(AuthContext);
+const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
+
+export { AuthProvider, useAuth };
