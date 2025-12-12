@@ -121,7 +121,7 @@ const ForgotPasswordPage = () => {
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="seu@email.com"
+                        placeholder="Digite o seu e-mail"
                         className="bg-background"
                         {...field}
                       />

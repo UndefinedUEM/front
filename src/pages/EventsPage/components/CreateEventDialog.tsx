@@ -80,7 +80,7 @@ const CreateEventDialog = ({ onCreate }: CreateEventDialogProps) => {
                   <FormLabel>Nome do evento</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ex: Reunião Semanal"
+                      placeholder="Digite o título do evento"
                       className="bg-background"
                       {...field}
                     />
@@ -125,7 +125,7 @@ const CreateEventDialog = ({ onCreate }: CreateEventDialogProps) => {
                   <FormLabel>Local</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ex: Sede do Grupo"
+                      placeholder="Digite o local do evento"
                       className="bg-background"
                       {...field}
                     />

@@ -154,7 +154,7 @@ const EventsPage = () => {
               events={upcomingEvents}
               onEdit={setEditingEvent}
               onDelete={handleDeleteClick}
-              onViewDetails={setViewingEvent} // ADICIONADO AQUI
+              onViewDetails={setViewingEvent}
               canManage={canManageEvents}
             />
           </TabsContent>

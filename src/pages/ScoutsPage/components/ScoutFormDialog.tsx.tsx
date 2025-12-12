@@ -102,7 +102,7 @@ const ScoutFormDialog = ({
                   <FormLabel>ID / Registro</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ex: 123456"
+                      placeholder="Digite o ID"
                       {...field}
                       disabled={!!editingScout}
                       className={
@@ -125,7 +125,7 @@ const ScoutFormDialog = ({
                   <FormLabel>Nome Completo</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ex: João Silva"
+                      placeholder="Digite o nome"
                       className="bg-background"
                       {...field}
                     />

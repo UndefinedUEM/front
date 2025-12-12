@@ -90,7 +90,7 @@ const RegisterPage = () => {
                     <FormLabel>Nome completo</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Seu nome"
+                        placeholder="Digite seu nome"
                         className="bg-background"
                         {...field}
                       />
@@ -110,7 +110,7 @@ const RegisterPage = () => {
                       <Input
                         type="email"
                         placeholder="seu@email.com"
-                        className="bg-background"
+                        className="Digite seu e-mail"
                         {...field}
                       />
                     </FormControl>
@@ -127,7 +127,7 @@ const RegisterPage = () => {
                     <FormLabel>ID do Usuário</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Escolha um ID único"
+                        placeholder="Digite seu ID"
                         className="bg-background"
                         {...field}
                       />

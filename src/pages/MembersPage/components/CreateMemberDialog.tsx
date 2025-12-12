@@ -97,7 +97,7 @@ const CreateMemberDialog = ({ onCreate }: CreateMemberDialogProps) => {
                     <FormLabel>Nome Completo</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ex: Ana Souza"
+                        placeholder="Digite o nome"
                         className="bg-background"
                         {...field}
                       />
@@ -114,7 +114,7 @@ const CreateMemberDialog = ({ onCreate }: CreateMemberDialogProps) => {
                     <FormLabel>ID / Registro</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ex: 123456"
+                        placeholder="Digite o ID"
                         className="bg-background"
                         {...field}
                       />
@@ -185,7 +185,7 @@ const CreateMemberDialog = ({ onCreate }: CreateMemberDialogProps) => {
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="email@exemplo.com"
+                      placeholder="Digite o email"
                       className="bg-background"
                       {...field}
                     />
