@@ -7,7 +7,6 @@ import DashboardPage from '@/pages/DashboardPage';
 import AttendancePage from '@/pages/AttendancePage';
 import ScoutsPage from '@/pages/ScoutsPage';
 import EventsPage from '@/pages/EventsPage';
-import UsersPage from '@/pages/UsersPage';
 import ProfilePage from '@/pages/ProfilePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import MembersPage from '@/pages/MembersPage';
@@ -44,8 +43,6 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-
-        <Route path="/users" element={<UsersPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
