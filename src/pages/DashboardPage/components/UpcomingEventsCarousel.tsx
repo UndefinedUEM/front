@@ -19,11 +19,11 @@ const UpcomingEventsCarousel = () => {
         </Link>
       </CardHeader>
 
-      <CardContent className="flex w-full gap-3 overflow-x-auto pb-4 scrollbar-hide">
-        {upcomingEvents.map((event) => (
+      <CardContent className="flex w-full gap-3 overflow-x-auto pb-4 scrollbar-hide md:flex-col md:overflow-visible md:pb-4">
+        {upcomingEvents.slice(0, 3).map((event) => (
           <div
             key={event.id}
-            className="flex min-w-[260px] flex-none flex-col justify-between rounded-lg border border-border bg-background p-3 shadow-sm"
+            className="flex min-w-[260px] flex-none flex-col justify-between rounded-lg border border-border bg-background p-3 shadow-sm md:w-full md:min-w-0"
           >
             <div>
               <div className="flex items-start justify-between mb-2">
