@@ -7,13 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   User,
   Mail,
   Shield,
@@ -27,7 +20,7 @@ import {
 import { useToast } from '@/hooks/useToast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Role, Section, ROLES, SECTIONS } from '@/types';
+import { Role, Section } from '@/types';
 import { initialMembers } from '@/mock-list';
 import { getSectionColor } from '@/utils/getSectionColor';
 import { getRoleColor } from '@/utils/getRoleColor';
@@ -130,7 +123,7 @@ const ProfilePage = () => {
     );
   };
 
-  const renderSection = () => {
+  const renderSectionBadge = () => {
     if (!formData.section) return null;
 
     return (
@@ -161,7 +154,7 @@ const ProfilePage = () => {
               <Shield className="mr-1 h-3 w-3" />
               {formData.role}
             </Badge>
-            {renderSection()}
+            {renderSectionBadge()}
           </div>
         </div>
       </CardContent>
@@ -183,6 +176,7 @@ const ProfilePage = () => {
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Nome - Editável */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-muted-foreground">
             <User className="h-4 w-4" />
@@ -199,6 +193,7 @@ const ProfilePage = () => {
           )}
         </div>
 
+        {/* Email - Editável */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-muted-foreground">
             <Mail className="h-4 w-4" />
@@ -216,56 +211,31 @@ const ProfilePage = () => {
           )}
         </div>
 
+        {/* Cargo - Somente Leitura (Segurança) */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-muted-foreground">
             <Shield className="h-4 w-4" />
             Cargo
           </Label>
-          {isEditing ? (
-            <Select
-              value={formData.role}
-              onValueChange={(value) => handleChange('role', value)}
-            >
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Selecione o cargo" />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLES.map((role) => (
-                  <SelectItem key={role} value={role}>
-                    {role}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <p className="text-foreground">{formData.role}</p>
+          <div className="p-2 border rounded-md bg-muted text-muted-foreground cursor-not-allowed">
+            {formData.role}
+          </div>
+          {isEditing && (
+            <p className="text-xs text-muted-foreground">
+              * O cargo não pode ser alterado.
+            </p>
           )}
         </div>
 
+        {/* Seção - Somente Leitura (Segurança) */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-muted-foreground">
             <Flag className="h-4 w-4" />
             Seção
           </Label>
-          {isEditing ? (
-            <Select
-              value={formData.section}
-              onValueChange={(value) => handleChange('section', value)}
-            >
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Selecione a seção" />
-              </SelectTrigger>
-              <SelectContent>
-                {SECTIONS.map((section) => (
-                  <SelectItem key={section} value={section}>
-                    {section}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <p className="text-foreground">{formData.section}</p>
-          )}
+          <div className="p-2 border rounded-md bg-muted text-muted-foreground cursor-not-allowed">
+            {formData.section || 'Não definida'}
+          </div>
         </div>
       </CardContent>
     </Card>

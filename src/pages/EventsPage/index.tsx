@@ -13,11 +13,42 @@ import {
   downloadCSV,
 } from '@/utils/generateAttendanceCSV';
 import type { Event, EventFormData } from './types';
-import {
-  initialPastEvents,
-  initialUpcomingEvents,
-  mockAttendanceData,
-} from '@/mock-list';
+import { useAuth } from '@/contexts/AuthContext';
+import { Role, Section, type Scout, type Member } from '@/types';
+import { mockAttendanceData } from '@/mock-list';
+
+const initialUpcomingEvents: Event[] = [
+  {
+    id: '1',
+    name: 'Reunião Semanal',
+    date: '2025-12-03',
+    time: '14:00',
+    location: 'Sede do Grupo',
+    description: 'Reunião regular de atividades',
+    status: 'ongoing',
+  },
+  {
+    id: '2',
+    name: 'Acampamento Regional',
+    date: '2025-12-15',
+    time: '08:00',
+    location: 'Parque Municipal',
+    description: 'Acampamento de integração regional',
+    status: 'scheduled',
+  },
+];
+
+const initialPastEvents: Event[] = [
+  {
+    id: '4',
+    name: 'Cerimônia de Abertura',
+    date: '2025-11-28',
+    time: '18:00',
+    location: 'Sede do Grupo',
+    status: 'completed',
+    attendees: 42,
+  },
+];
 
 const EventsPage = () => {
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>(
@@ -33,6 +64,10 @@ const EventsPage = () => {
   const [viewingEvent, setViewingEvent] = useState<Event | null>(null);
 
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const canManageEvents =
+    user?.role === Role.MASTER || user?.role === Role.CHEFE_SECAO;
 
   const handleCreateEvent = (data: EventFormData) => {
     const newEvent: Event = {
@@ -44,7 +79,6 @@ const EventsPage = () => {
       description: data.description,
       status: 'scheduled',
     };
-
     setUpcomingEvents((prev) => [...prev, newEvent]);
     toast({
       title: 'Evento criado!',
@@ -86,20 +120,11 @@ const EventsPage = () => {
       const csvContent = generateAttendanceCSV({
         eventName: event.name,
         eventDate: new Date(event.date + 'T12:00:00'),
-        scouts: mockAttendanceData.scouts.map((s) => ({
-          ...s,
-          section: s.section || '',
-        })),
-        leaders: mockAttendanceData.leaders.map((l) => ({
-          ...l,
-          role: l.role || '',
-        })),
+        scouts: mockAttendanceData.scouts as Scout[],
+        members: mockAttendanceData.leaders as Member[],
       });
-
       const fileName = `presenca_${event.date}_${event.name.replace(/\s+/g, '_')}.csv`;
-
       downloadCSV(csvContent, fileName);
-
       toast({
         title: 'Download iniciado',
         description: `A lista de presença de "${event.name}" foi baixada.`,
@@ -116,7 +141,7 @@ const EventsPage = () => {
   return (
     <AppLayout title="Eventos">
       <div className="space-y-4 p-4">
-        <CreateEventDialog onCreate={handleCreateEvent} />
+        {canManageEvents && <CreateEventDialog onCreate={handleCreateEvent} />}
 
         <Tabs defaultValue="upcoming" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -129,6 +154,8 @@ const EventsPage = () => {
               events={upcomingEvents}
               onEdit={setEditingEvent}
               onDelete={handleDeleteClick}
+              onViewDetails={setViewingEvent} // ADICIONADO AQUI
+              canManage={canManageEvents}
             />
           </TabsContent>
 

@@ -9,9 +9,15 @@ interface ScoutsListProps {
   scouts: Scout[];
   onEdit: (scout: Scout) => void;
   onDelete: (scout: Scout) => void;
+  canManage: boolean;
 }
 
-const ScoutsList = ({ scouts, onEdit, onDelete }: ScoutsListProps) => {
+const ScoutsList = ({
+  scouts,
+  onEdit,
+  onDelete,
+  canManage,
+}: ScoutsListProps) => {
   return (
     <div className="space-y-3">
       {scouts.map((scout) => (
@@ -37,19 +43,25 @@ const ScoutsList = ({ scouts, onEdit, onDelete }: ScoutsListProps) => {
               </div>
             </div>
 
-            <div className="flex gap-1">
-              <Button variant="ghost" size="icon" onClick={() => onEdit(scout)}>
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                onClick={() => onDelete(scout)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+            {canManage && (
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(scout)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => onDelete(scout)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       ))}

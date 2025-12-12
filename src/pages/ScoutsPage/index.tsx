@@ -38,6 +38,8 @@ const ScoutsPage = () => {
   const { user } = useAuth();
 
   const isMaster = user?.role === Role.MASTER;
+  const canManageScouts =
+    user?.role === Role.MASTER || user?.role === Role.CHEFE_SECAO;
 
   const availableSections = isMaster
     ? SECTIONS
@@ -270,42 +272,50 @@ const ScoutsPage = () => {
     </div>
   );
 
-  const renderActionButtons = () => (
-    <div className="flex gap-2">
-      <Button className="flex-1" onClick={openAddDialog}>
-        <Plus className="mr-2 h-4 w-4" />
-        Novo Escoteiro
-      </Button>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".csv"
-        onChange={handleFileChange}
-        className="hidden"
-      />
-      <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-        <Upload className="mr-2 h-4 w-4" />
-        Importar
-      </Button>
-    </div>
-  );
+  const renderActionButtons = () => {
+    if (!canManageScouts) return null;
 
-  const renderCsvTemplateInfo = () => (
-    <Card className="border-dashed border-primary/50 bg-primary/5">
-      <CardContent className="flex items-center justify-between p-3">
-        <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-primary" />
-          <span className="text-sm text-muted-foreground">
-            Modelo CSV: <strong>ID, Nome, Seção</strong>
-          </span>
-        </div>
-        <Button variant="ghost" size="sm" onClick={handleDownloadTemplate}>
-          <Download className="mr-1 h-3 w-3" />
-          Baixar modelo
+    return (
+      <div className="flex gap-2">
+        <Button className="flex-1" onClick={openAddDialog}>
+          <Plus className="mr-2 h-4 w-4" />
+          Novo Escoteiro
         </Button>
-      </CardContent>
-    </Card>
-  );
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+          <Upload className="mr-2 h-4 w-4" />
+          Importar
+        </Button>
+      </div>
+    );
+  };
+
+  const renderCsvTemplateInfo = () => {
+    if (!canManageScouts) return null;
+
+    return (
+      <Card className="border-dashed border-primary/50 bg-primary/5">
+        <CardContent className="flex items-center justify-between p-3">
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-primary" />
+            <span className="text-sm text-muted-foreground">
+              Modelo CSV: <strong>ID, Nome, Seção</strong>
+            </span>
+          </div>
+          <Button variant="ghost" size="sm" onClick={handleDownloadTemplate}>
+            <Download className="mr-1 h-3 w-3" />
+            Baixar modelo
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  };
 
   const renderStats = () => (
     <div className="rounded-lg bg-primary/10 p-3">
@@ -353,6 +363,7 @@ const ScoutsPage = () => {
           scouts={filteredScouts}
           onEdit={openEditDialog}
           onDelete={openDeleteDialog}
+          canManage={canManageScouts}
         />
       </div>
     </AppLayout>

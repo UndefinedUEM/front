@@ -3,16 +3,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   Calendar,
   Clock,
   MapPin,
-  MoreVertical,
   Pencil,
   Trash2,
   ChevronRight,
@@ -23,12 +16,16 @@ interface UpcomingEventsTabProps {
   events: Event[];
   onEdit: (event: Event) => void;
   onDelete: (id: string, name: string) => void;
+  onViewDetails: (event: Event) => void;
+  canManage: boolean;
 }
 
 const UpcomingEventsTab = ({
   events,
   onEdit,
   onDelete,
+  onViewDetails,
+  canManage,
 }: UpcomingEventsTabProps) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -46,7 +43,11 @@ const UpcomingEventsTab = ({
   return (
     <div className="space-y-3 pt-4">
       {events.map((event) => (
-        <Card key={event.id} className="border-border bg-card">
+        <Card
+          key={event.id}
+          className="border-border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
+          onClick={() => onViewDetails(event)}
+        >
           <CardContent className="p-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -78,34 +79,40 @@ const UpcomingEventsTab = ({
                   </span>
                 </div>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => onEdit(event)}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Editar
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => onDelete(event.id, event.name)}
-                    className="text-destructive focus:text-destructive"
+
+              {canManage && (
+                <div
+                  className="flex gap-1"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(event)}
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Excluir
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => onDelete(event.id, event.name)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
+
             {event.status === 'ongoing' && (
-              <Link to="/attendance">
-                <Button className="mt-3 w-full" size="sm">
-                  Marcar Presença
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+              <div onClick={(e) => e.stopPropagation()}>
+                <Link to="/attendance">
+                  <Button className="mt-3 w-full" size="sm">
+                    Marcar Presença
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             )}
           </CardContent>
         </Card>

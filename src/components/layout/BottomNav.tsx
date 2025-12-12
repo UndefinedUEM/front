@@ -8,18 +8,23 @@ import {
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { icon: Home, label: 'Início', path: '/dashboard' },
-  { icon: ClipboardList, label: 'Presença', path: '/attendance' },
-  { icon: TentTree, label: 'Escoteiros', path: '/scouts' },
-  { icon: Calendar, label: 'Eventos', path: '/events' },
-  { icon: Users, label: 'Membros', path: '/members' },
-  { icon: User, label: 'Perfil', path: '/profile' },
-];
+import { useAuth } from '@/contexts/AuthContext';
+import { Role } from '@/types';
 
 const BottomNav = () => {
   const location = useLocation();
+  const { user } = useAuth();
+
+  const navItems = [
+    { icon: Home, label: 'Início', path: '/dashboard' },
+    { icon: ClipboardList, label: 'Presença', path: '/attendance' },
+    { icon: TentTree, label: 'Escoteiros', path: '/scouts' },
+    { icon: Calendar, label: 'Eventos', path: '/events' },
+    ...(user?.role === Role.MASTER
+      ? [{ icon: Users, label: 'Membros', path: '/members' }]
+      : []),
+    { icon: User, label: 'Perfil', path: '/profile' },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card shadow-lg">

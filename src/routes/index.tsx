@@ -11,6 +11,7 @@ import UsersPage from '@/pages/UsersPage';
 import ProfilePage from '@/pages/ProfilePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import MembersPage from '@/pages/MembersPage';
+import { Role } from '@/types';
 
 const ProtectedLayout = () => {
   return (
@@ -34,7 +35,16 @@ const AppRoutes = () => {
         <Route path="/attendance" element={<AttendancePage />} />
         <Route path="/scouts" element={<ScoutsPage />} />
         <Route path="/events" element={<EventsPage />} />
-        <Route path="/members" element={<MembersPage />} />
+
+        <Route
+          path="/members"
+          element={
+            <ProtectedRoute allowedRoles={[Role.MASTER]}>
+              <MembersPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="/users" element={<UsersPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Route>

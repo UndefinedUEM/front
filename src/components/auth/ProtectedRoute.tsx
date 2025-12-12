@@ -1,16 +1,28 @@
 import type { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Role } from '@/types';
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  allowedRoles?: Role[];
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  // TODO: Replace with real authentication check when backend is connected
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+export function ProtectedRoute({
+  children,
+  allowedRoles,
+}: ProtectedRouteProps) {
+  const { user, isAuthenticated } = useAuth();
+  const location = useLocation();
 
   if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
+  if (allowedRoles && user) {
+    if (!allowedRoles.includes(user.role)) {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return <>{children}</>;

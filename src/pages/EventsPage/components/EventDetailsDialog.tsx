@@ -14,30 +14,13 @@ import {
   downloadCSV,
 } from '@/utils/generateAttendanceCSV';
 import type { Event, EventDetails } from '../types';
+import { mockAttendanceData } from '@/mock-list';
 
 interface EventDetailsDialogProps {
   isOpen: boolean;
   onClose: () => void;
   event: Event | null;
 }
-
-const mockDetails: EventDetails = {
-  scouts: [
-    { id: '1', name: 'João Silva', section: 'Tropa Sênior', isPresent: true },
-    { id: '2', name: 'Maria Santos', section: 'Tropa Sênior', isPresent: true },
-    {
-      id: '3',
-      name: 'Pedro Oliveira',
-      section: 'Tropa Sênior',
-      isPresent: false,
-    },
-    { id: '4', name: 'Ana Costa', section: 'Alcateia', isPresent: true },
-  ],
-  leaders: [
-    { id: 'l1', name: 'Carlos Souza', role: 'Chefe de Seção', isPresent: true },
-    { id: 'l2', name: 'Fernanda Rocha', role: 'Monitor', isPresent: true },
-  ],
-};
 
 const EventDetailsDialog = ({
   isOpen,
@@ -50,19 +33,26 @@ const EventDetailsDialog = ({
     const csvContent = generateAttendanceCSV({
       eventName: event.name,
       eventDate: new Date(event.date + 'T12:00:00'),
-      scouts: mockDetails.scouts.map((s) => ({
+      scouts: mockAttendanceData.scouts.map((s) => ({
         ...s,
         section: s.section || '',
       })),
-      leaders: mockDetails.leaders.map((l) => ({ ...l, role: l.role || '' })),
+      members: mockAttendanceData.leaders.map((l) => ({
+        ...l,
+        role: l.role || '',
+      })),
     });
 
     const fileName = `presenca_${event.date}_${event.name.replace(/\s+/g, '_')}.csv`;
     downloadCSV(csvContent, fileName);
   };
 
-  const presentScouts = mockDetails.scouts.filter((s) => s.isPresent).length;
-  const presentLeaders = mockDetails.leaders.filter((l) => l.isPresent).length;
+  const presentScouts = mockAttendanceData.scouts.filter(
+    (s) => s.isPresent
+  ).length;
+  const presentLeaders = mockAttendanceData.leaders.filter(
+    (l) => l.isPresent
+  ).length;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -110,7 +100,7 @@ const EventDetailsDialog = ({
             className="flex-1 overflow-y-auto mt-2 pr-1"
           >
             <div className="space-y-2">
-              {mockDetails.scouts.map((scout) => (
+              {mockAttendanceData.scouts.map((scout) => (
                 <div
                   key={scout.id}
                   className="flex items-center justify-between rounded-md border p-3"
@@ -134,7 +124,7 @@ const EventDetailsDialog = ({
             className="flex-1 overflow-y-auto mt-2 pr-1"
           >
             <div className="space-y-2">
-              {mockDetails.leaders.map((leader) => (
+              {mockAttendanceData.leaders.map((leader) => (
                 <div
                   key={leader.id}
                   className="flex items-center justify-between rounded-md border p-3"
